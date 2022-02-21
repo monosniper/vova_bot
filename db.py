@@ -7,6 +7,7 @@ class DB:
         self.cursor = None
         self.default_settings = {
             'minutes': '15',
+            'content': open(config.CONTENT_FILE).read()
         }
 
     def connect(self):
