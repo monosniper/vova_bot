@@ -35,6 +35,8 @@ class DB:
                 telegram_id varchar(50) UNIQUE NOT NULL);"""
         )
 
+        self.cursor.close()
+
         # connection.commit()
         print("[INFO] Admins table created successfully")
 
@@ -46,6 +48,8 @@ class DB:
                 value text NULL);"""
         )
 
+        self.cursor.close()
+
         # connection.commit()
         print("[INFO] Settings table created successfully")
 
@@ -56,26 +60,35 @@ class DB:
                 telegram_id varchar(50) UNIQUE NOT NULL);"""
         )
 
+        self.cursor.close()
+
         # connection.commit()
         print("[INFO] Groups table created successfully")
 
     def addGroup(self, telegram_id):
         self.cursor.execute("INSERT INTO groups (telegram_id) VALUES (%s) ON CONFLICT DO NOTHING;", [str(telegram_id)])
+        self.cursor.close()
 
     def addAdmin(self, telegram_id):
         self.cursor.execute("INSERT INTO admins (telegram_id) VALUES (%s) ON CONFLICT DO NOTHING;", [str(telegram_id)])
+        self.cursor.close()
 
     def setSetting(self, key, value):
         self.cursor.execute("INSERT INTO settings (key, value) VALUES (%s, %s) ON CONFLICT (key) DO UPDATE SET value = %s;", [str(key), str(value), str(value)])
+        self.cursor.close()
 
     def getSetting(self, key):
         self.cursor.execute("SELECT value FROM settings WHERE key = %s", [str(key)])
         result = self.cursor.fetchone()
+
+        self.cursor.close()
         return result[0]
 
     def isAdmin(self, telegram_id):
         self.cursor.execute("SELECT EXISTS(SELECT * FROM admins WHERE telegram_id = %s)", [str(telegram_id)])
         result = self.cursor.fetchone()
+
+        self.cursor.close()
         return result[0]
 
     def getGroups(self):
@@ -86,5 +99,7 @@ class DB:
         result = self.cursor.fetchall()
 
         result_in_list = list(map(lambda i: i[0], result))
+
+        self.cursor.close()
 
         return result_in_list
