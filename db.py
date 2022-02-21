@@ -5,6 +5,9 @@ class DB:
     def __init__(self):
         self.connection = None
         self.cursor = None
+        self.default_settings = {
+            'minutes': '15',
+        }
 
     def connect(self):
         # connect to exist database
@@ -21,6 +24,9 @@ class DB:
         self.createAdminsTable()
         self.createSettingsTable()
         self.createGroupsTable()
+
+        for key, value in self.default_settings.items():
+            self.setSetting(key, value)
 
     def close(self):
         self.cursor.close()
@@ -64,12 +70,12 @@ class DB:
         self.cursor.execute("INSERT INTO admins (telegram_id) VALUES (%s) ON CONFLICT DO NOTHING;", [str(telegram_id)])
 
     def setSetting(self, key, value):
-        self.cursor.execute("INSERT INTO settings (key, value) VALUES (%s, %s) ON CONFLICT DO UPDATE ;", [str(key), str(value)])
+        self.cursor.execute("INSERT INTO settings (key, value) VALUES (%s, %s) ON CONFLICT (key) DO UPDATE SET value = %s;", [str(key), str(value), str(value)])
 
     def getSetting(self, key):
         self.cursor.execute("SELECT value FROM settings WHERE key = %s", [str(key)])
         result = self.cursor.fetchone()
-        return result
+        return result[0]
 
     def isAdmin(self, telegram_id):
         self.cursor.execute("SELECT EXISTS(SELECT * FROM admins WHERE telegram_id = %s)", [str(telegram_id)])

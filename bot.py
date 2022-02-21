@@ -103,6 +103,7 @@ def requestPassword(message):
 
 @bot.message_handler(commands=['start'])
 def start(message):
+    print('TEST')
     database.addGroup(message.chat.id)
     # groups_file = open(config.GROUPS_FILE, 'a')
     #
@@ -173,7 +174,7 @@ def webhook():
 try:
 
     database.connect()
-
+    print(database.getGroups())
     if __name__ == '__main__':
         scheduler.start()
 
