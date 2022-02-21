@@ -173,8 +173,8 @@ def webhook():
 
 try:
 
-    database.connect()
-    print(database.getGroups())
+    # database.connect()
+    # print(database.getGroups())
     if __name__ == '__main__':
         scheduler.start()
 
