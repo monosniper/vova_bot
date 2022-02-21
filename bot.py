@@ -14,18 +14,20 @@ database.connect()
 class ScheduleText:
 
     def __init__(self):
-        self.minutes = int(database.getSetting('minutes'))
-        self.process = Process(target=self.try_send_schedule, args=())
+        self.process = Process(target=self.try_send_schedule, args=( int( database.getSetting('minutes') ), ))
 
     def sendText(self):
         content = database.getSetting('content')
         groups = database.getGroups()
 
         for group in groups:
-            bot.send_message(group, content)
+            try:
+                bot.send_message(group, content)
+            except:
+                pass
 
-    def try_send_schedule(self):
-        schedule.every(self.minutes).minutes.do(self.sendText)
+    def try_send_schedule(self, minutes):
+        schedule.every(minutes).minutes.do(self.sendText)
 
         while True:
             schedule.run_pending()
@@ -35,11 +37,10 @@ class ScheduleText:
         self.process.start()
 
     def restart(self):
-        self.minutes = int(database.getSetting('minutes'))
         schedule.clear()
         self.process.terminate()
 
-        self.process = Process(target=self.try_send_schedule, args=())
+        self.process = Process(target=self.try_send_schedule, args=( int( database.getSetting('minutes') ), ) )
 
 
 logger = telebot.logger
