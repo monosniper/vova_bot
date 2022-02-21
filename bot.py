@@ -27,7 +27,9 @@ class ScheduleText:
                 pass
 
     def try_send_schedule(self, minutes):
-        schedule.every(minutes).minutes.do(self.sendText)
+        print('TEST SCHEDULE')
+        print(minutes)
+        schedule.every(5).seconds.do(self.sendText)
 
         while True:
             schedule.run_pending()
@@ -148,13 +150,13 @@ def cancel(message):
 
 
 @bot.message_handler(commands=['minutes'])
-def minutesChange(message):
-    if message.chat.type == config.PRIVATE_CHAT_TYPE:
-        if database.isAdmin(message.chat.id):
-            bot.send_message(message.chat.id, config.ANSWERS['minutes']['after_command'])
-            setActiveHandler('minutes_change')
-        else:
-            requestPassword(message)
+# def minutesChange(message):
+#     if message.chat.type == config.PRIVATE_CHAT_TYPE:
+#         if database.isAdmin(message.chat.id):
+#             bot.send_message(message.chat.id, config.ANSWERS['minutes']['after_command'])
+#             setActiveHandler('minutes_change')
+#         else:
+#             requestPassword(message)
 
 
 @bot.message_handler(content_types=['text'])
