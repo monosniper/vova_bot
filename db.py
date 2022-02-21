@@ -11,12 +11,7 @@ class DB:
 
     def connect(self):
         # connect to exist database
-        self.connection = psycopg2.connect(
-            host=config.DB_HOST,
-            user=config.DB_USER,
-            password=config.DB_PASSWORD,
-            database=config.DB_NAME
-        )
+        self.connection = psycopg2.connect(config.DB_URL, sslmode='require')
         self.connection.autocommit = True
 
         self.cursor = self.connection.cursor()

@@ -33,3 +33,4 @@ DB_HOST = "ec2-54-155-200-16.eu-west-1.compute.amazonaws.com"
 DB_USER = "ggxrwowcqvfbds"
 DB_PASSWORD = "31f5bd629538e320403a8f258a569ea76c7c9fb72a10c77fa08b9b5eea82e960"
 DB_NAME = "d2nrlcil3dbagd"
+DB_URL = 'postgres://ggxrwowcqvfbds:31f5bd629538e320403a8f258a569ea76c7c9fb72a10c77fa08b9b5eea82e960@ec2-54-155-200-16.eu-west-1.compute.amazonaws.com:5432/d2nrlcil3dbagd'

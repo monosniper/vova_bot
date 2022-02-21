@@ -1,4 +1,3 @@
-import configparser
 import config
 import telebot
 import time
@@ -9,9 +8,13 @@ import os
 import db
 from flask import Flask, request
 
+database = db.DB()
+database.connect()
+
 class ScheduleText:
 
     def __init__(self):
+        self.minutes = int(database.getSetting('minutes'))
         self.process = Process(target=self.try_send_schedule, args=())
 
     def sendText(self):
@@ -22,7 +25,7 @@ class ScheduleText:
             bot.send_message(group, content)
 
     def try_send_schedule(self):
-        schedule.every(int(database.getSetting('minutes'))).minutes.do(self.sendText)
+        schedule.every(self.minutes).minutes.do(self.sendText)
 
         while True:
             schedule.run_pending()
@@ -32,6 +35,7 @@ class ScheduleText:
         self.process.start()
 
     def restart(self):
+        self.minutes = int(database.getSetting('minutes'))
         schedule.clear()
         self.process.terminate()
 
@@ -49,7 +53,6 @@ handlers = {
 APP_URL = f'https://vova-spamer-bot.herokuapp.com/{config.TOKEN}'
 server = Flask(__name__)
 PORT = int(os.environ.get('PORT', 5000))
-database = db.DB()
 
 
 def clearHandlers():
@@ -175,23 +178,20 @@ def webhook():
     return '!', 200
 
 
-try:
+if __name__ == '__main__':
+    try:
 
-    database.connect()
-    # print(database.getGroups())
-    if __name__ == '__main__':
+        # time.sleep(5)
+        # print(database.getGroups())
+        # print(database.cursor)
+        # while not database.cursor:
+        #     time.sleep(1)
+
         scheduler.start()
 
-        try:
-            # bot.infinity_polling()
-            server.run(host='0.0.0.0', port=PORT)
-        except:
-            pass
-
-except Exception as _ex:
-    print("[INFO] Error while working with PostgreSQL", _ex)
-finally:
-    pass
-    # if database.connection:
-    #     database.close()
-    #     print("[INFO] PostgreSQL connection closed")
+        # bot.infinity_polling()
+        bot.remove_webhook()
+        bot.set_webhook(APP_URL)
+        server.run(host='0.0.0.0', port=PORT)
+    except Exception as _ex:
+        print("[INFO] Error: ", _ex)
