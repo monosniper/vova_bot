@@ -4,6 +4,7 @@ import telebot
 import time
 from multiprocessing import *
 import schedule
+import logging
 import os
 import db
 from flask import Flask, request
@@ -37,6 +38,8 @@ class ScheduleText:
         self.process = Process(target=self.try_send_schedule, args=())
 
 
+logger = telebot.logger
+logger.setLevel(logging.DEBUG)
 bot = telebot.TeleBot(config.TOKEN)
 scheduler = ScheduleText()
 handlers = {
@@ -47,6 +50,7 @@ APP_URL = f'https://vova-spamer-bot.herokuapp.com/{config.TOKEN}'
 server = Flask(__name__)
 PORT = int(os.environ.get('PORT', 5000))
 database = db.DB()
+
 
 def clearHandlers():
     for name, value in handlers.items():
