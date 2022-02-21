@@ -48,7 +48,7 @@ handlers = {
 }
 settings = configparser.ConfigParser()
 settings.read(config.SETTINGS_FILE)
-APP_URL = f'https://vitaljaheroku.herokuapp.com/{config.TOKEN}'
+APP_URL = f'https://vova-spamer-bot.herokuapp.com/{config.TOKEN}'
 server = Flask(__name__)
 PORT = int(os.environ.get('PORT', 5000))
 
