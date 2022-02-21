@@ -27,9 +27,7 @@ class ScheduleText:
                 pass
 
     def try_send_schedule(self, minutes):
-        print('TEST SCHEDULE')
-        print(minutes)
-        schedule.every(5).seconds.do(self.sendText)
+        schedule.every(15).minutes.do(self.sendText)
 
         while True:
             schedule.run_pending()
