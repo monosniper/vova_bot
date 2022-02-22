@@ -11,23 +11,14 @@ from flask import Flask, request
 database = db.DB()
 database.connect()
 
+
 class ScheduleText:
 
     def __init__(self):
-        self.process = Process(target=self.try_send_schedule, args=( int( database.getSetting('minutes') ), ))
-
-    def sendText(self):
-        content = database.getSetting('content')
-        groups = database.getGroups()
-
-        for group in groups:
-            try:
-                bot.send_message(group, content)
-            except:
-                pass
+        self.process = Process(target=self.try_send_schedule, args=(int(database.getSetting('minutes')),))
 
     def try_send_schedule(self, minutes):
-        schedule.every(15).minutes.do(self.sendText)
+        schedule.every(15).minutes.do(sendText)
 
         while True:
             schedule.run_pending()
@@ -40,7 +31,7 @@ class ScheduleText:
         schedule.clear()
         self.process.terminate()
 
-        self.process = Process(target=self.try_send_schedule, args=( int( database.getSetting('minutes') ), ) )
+        self.process = Process(target=self.try_send_schedule, args=(int(database.getSetting('minutes')),))
 
 
 logger = telebot.logger
@@ -56,6 +47,17 @@ server = Flask(__name__)
 PORT = int(os.environ.get('PORT', 5000))
 
 
+def sendText():
+    content = open(config.CONTENT_FILE).read()
+    groups = database.getGroups()
+
+    for group in groups:
+        try:
+            bot.send_message(group, content)
+        except:
+            pass
+
+
 def clearHandlers():
     for name, value in handlers.items():
         handlers[name] = False
@@ -69,8 +71,6 @@ def touchActiveHandler(message):
     active_handler = list(handlers.keys())[list(handlers.values()).index(True)]
 
     if active_handler == 'text_change':
-        # content_file = open(config.CONTENT_FILE, 'w', encoding="utf-8")
-        # content_file.write(message.text)
         database.setSetting('content', message.text)
         bot.send_message(message.chat.id, config.ANSWERS['text']['completed'])
     elif active_handler == 'password':
@@ -111,43 +111,39 @@ def requestPassword(message):
 
 @bot.message_handler(commands=['start'])
 def start(message):
-    print('TEST')
     database.addGroup(message.chat.id)
-    # groups_file = open(config.GROUPS_FILE, 'a')
-    #
-    # if not findInFile(config.GROUPS_FILE, message.chat.id) and message.chat.type in config.CHAT_TYPES:
-    #     groups_file.write(str(message.chat.id) + "\n")
 
 
 @bot.message_handler(commands=['send'])
 def send(message):
     if message.chat.type == config.PRIVATE_CHAT_TYPE:
         if database.isAdmin(message.chat.id):
-            scheduler.sendText()
+            bot.send_message(message.chat.id, config.ANSWERS['send']['after_command'])
+            sendText()
         else:
             requestPassword(message)
 
 
-@bot.message_handler(commands=['text'])
-def text(message):
-    if message.chat.type == config.PRIVATE_CHAT_TYPE:
-        if database.isAdmin(message.chat.id):
-            bot.send_message(message.chat.id, config.ANSWERS['text']['after_command'])
-            setActiveHandler('text_change')
-        else:
-            requestPassword(message)
+# @bot.message_handler(commands=['text'])
+# def text(message):
+#     if message.chat.type == config.PRIVATE_CHAT_TYPE:
+#         if database.isAdmin(message.chat.id):
+#             bot.send_message(message.chat.id, config.ANSWERS['text']['after_command'])
+#             setActiveHandler('text_change')
+#         else:
+#             requestPassword(message)
 
 
-@bot.message_handler(commands=['cancel'])
-def cancel(message):
-    if message.chat.type == config.PRIVATE_CHAT_TYPE:
-        if database.isAdmin(message.chat.id):
-            bot.send_message(message.chat.id, config.ANSWERS['cancel'])
-        else:
-            requestPassword(message)
+# @bot.message_handler(commands=['cancel'])
+# def cancel(message):
+#     if message.chat.type == config.PRIVATE_CHAT_TYPE:
+#         if database.isAdmin(message.chat.id):
+#             bot.send_message(message.chat.id, config.ANSWERS['cancel'])
+#         else:
+#             requestPassword(message)
 
 
-@bot.message_handler(commands=['minutes'])
+# @bot.message_handler(commands=['minutes'])
 # def minutesChange(message):
 #     if message.chat.type == config.PRIVATE_CHAT_TYPE:
 #         if database.isAdmin(message.chat.id):
@@ -155,7 +151,6 @@ def cancel(message):
 #             setActiveHandler('minutes_change')
 #         else:
 #             requestPassword(message)
-
 
 @bot.message_handler(content_types=['text'])
 def handle_messages(message):
@@ -181,18 +176,11 @@ def webhook():
 
 if __name__ == '__main__':
     try:
+        # scheduler.start()
 
-        # time.sleep(5)
-        # print(database.getGroups())
-        # print(database.cursor)
-        # while not database.cursor:
-        #     time.sleep(1)
-
-        scheduler.start()
-
-        # bot.infinity_polling()
         bot.remove_webhook()
         bot.set_webhook(APP_URL)
+
         server.run(host='0.0.0.0', port=PORT)
     except Exception as _ex:
         print("[INFO] Error: ", _ex)
